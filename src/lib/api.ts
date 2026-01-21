@@ -94,7 +94,26 @@ export async function clockIn(techName: string): Promise<ClockResponse> {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    // Handle different response formats from Make.com
+    const text = await response.text();
+
+    // If response is "Accepted" or empty, treat as success
+    if (text === "Accepted" || text === "" || response.status === 200) {
+      const today = new Date();
+      const dateStr = today.toISOString().split("T")[0];
+      return {
+        success: true,
+        shift_id: `${dateStr}_${techName}`
+      };
+    }
+
+    // Try to parse as JSON
+    try {
+      return JSON.parse(text);
+    } catch {
+      // If not JSON but got 200, treat as success
+      return { success: true };
+    }
   } catch (error) {
     console.error("Failed to clock in:", error);
     return { success: false, error: "Failed to connect. Please try again." };
@@ -117,7 +136,20 @@ export async function clockOut(techName: string): Promise<ClockResponse> {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    // Handle different response formats from Make.com
+    const text = await response.text();
+
+    // If response is "Accepted" or empty, treat as success
+    if (text === "Accepted" || text === "" || response.status === 200) {
+      return { success: true };
+    }
+
+    // Try to parse as JSON
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { success: true };
+    }
   } catch (error) {
     console.error("Failed to clock out:", error);
     return { success: false, error: "Failed to connect. Please try again." };
@@ -164,7 +196,23 @@ export async function submitMileage(
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    // Handle different response formats from Make.com
+    const text = await response.text();
+
+    // If response is "Accepted" or empty, treat as success
+    if (text === "Accepted" || text === "" || response.status === 200) {
+      return {
+        success: true,
+        entry_id: `mileage_${Date.now()}`
+      };
+    }
+
+    // Try to parse as JSON
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { success: true };
+    }
   } catch (error) {
     console.error("Failed to submit mileage:", error);
     return { success: false, error: "Failed to connect. Please try again." };
@@ -218,7 +266,20 @@ export async function editEntry(
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    // Handle different response formats from Make.com
+    const text = await response.text();
+
+    // If response is "Accepted" or empty, treat as success
+    if (text === "Accepted" || text === "" || response.status === 200) {
+      return { success: true };
+    }
+
+    // Try to parse as JSON
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { success: true };
+    }
   } catch (error) {
     console.error("Failed to edit entry:", error);
     return { success: false, error: "Failed to connect. Please try again." };
